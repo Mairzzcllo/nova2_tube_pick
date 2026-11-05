@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.env
+
+# 标定产物（按你的判断保留或删除对应行）
+config/T_base_camera.npy
+config/T_base_rack.npy
+config/camera_intrinsics.npz
+
+# 日志与临时文件
+*.log
+.DS_Store
+
+# 个人笔记
+note.md
