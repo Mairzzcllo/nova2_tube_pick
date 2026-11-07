@@ -26,6 +26,7 @@ Nova 2 机械臂试管抓取/归位项目。核心思想：标定、视觉、坐
 | `task/` | `tube_task_manager`（FSM 调度，不写算法） |
 | `common/` | 跨层类型与异常（计划新增：`types.py`、`errors.py`） |
 | `camera/` | 相机驱动（计划新增，品牌待定） |
+| `third_party/` | 厂商 SDK；Nova 2 SDK 位于 `third_party/dobot_sdk/dobot_api.py` |
 | `debug/` | 独立验证脚本，脚本内用 `assert`；非 pytest 用例 |
 | `main.py` | 入口：加载配置与标定 -> 组装各模块 -> 启动作业 |
 | `docs/agents/` | 按需读取的详细文档 |
@@ -51,7 +52,7 @@ tube_task_manager -> gripper_controller -> 夹爪
 - 统一环境：`~/miniconda3/envs/Dobot-Sim`（Python 3.11.17）。
 - 默认 `python` / conda base（3.13）**没有 cv2**，不要用它跑本项目。
 - 依赖：`requirements.txt`；新机器执行 `pip install -r requirements.txt`。
-- Nova 2 SDK 未在本仓库安装，版本与连接方式待补；接入后只允许在 `robot/nova2_client.py` 引用，并在该层完成单位转换。
+- Nova 2 SDK 位于 `third_party/dobot_sdk/dobot_api.py`，版本与连接方式待确认；只允许在 `robot/nova2_client.py` 引用，并在该层完成单位转换。
 
 ```bash
 # 相机内参标定

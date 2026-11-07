@@ -15,6 +15,7 @@
 | `task/tube_task_manager.py` | 占位 |
 | `common/types.py`、`common/errors.py` | 计划新增 |
 | `calibration/rack_calibration.py`、`calibration/rack_model.py` | 计划新增（阶段 8） |
+| `third_party/dobot_sdk/dobot_api.py` | 已迁入（厂商 SDK，版本待确认） |
 | `main.py` | 占位 |
 
 ## 代码约定
@@ -36,4 +37,5 @@
 
 - 提交规范、分支策略、CI、许可证当前未定义；不要自行补充或引入。
 - ruff/black/mypy 未配置；不要臆造 lint 命令。
-- Nova 2 SDK 版本与连接方式、相机品牌与驱动接口待确认。
+- Nova 2 SDK 位于 `third_party/dobot_sdk/dobot_api.py`，版本与连接方式待确认；只有 `robot/nova2_client.py` 可 import，其他模块禁止直接依赖。
+- 相机品牌与驱动接口待确认。

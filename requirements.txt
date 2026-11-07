@@ -1,9 +1,10 @@
 # Nova 2 试管抓取项目 Python 依赖
 # 统一环境：~/miniconda3/envs/Dobot-Sim (Python 3.11.17)
-# Nova 2 SDK 未包含在此文件中，请按厂商提供的版本单独安装。
+# Nova 2 SDK 位于 third_party/dobot_sdk/dobot_api.py；是否提交取决于厂商许可证。
 
 numpy==1.26.0
 opencv-python==4.14.0
 PyYAML==6.0.2
 scipy==1.15.3
 pytest==9.1.1
+requests==2.32.3

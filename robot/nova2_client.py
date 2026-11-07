@@ -4,6 +4,9 @@
     封装与 Nova 2 机械臂的底层通信（连接、位姿读写、状态查询），
     供上层 motion/gripper 控制器调用。
 
+SDK 位置：
+    third_party/dobot_sdk/dobot_api.py。本模块是唯一允许 import 该 SDK 的边界。
+
 说明：
     当前仅提供占位骨架，具体协议与 SDK 调用待实现。
 """
