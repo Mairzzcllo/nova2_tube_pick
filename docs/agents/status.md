@@ -10,11 +10,12 @@
 | `calibration/pose_recorder.py` | 已实现（交互式采集 + CLI + 离线测试） |
 | `calibration/handeye_calibration.py` | 已实现（eye-to-hand + CLI + 离线测试） |
 | `calibration/calibration_verify.py` | 已实现（接口迁移 + 离线测试） |
-| `vision/*.py` | 占位 |
+| `vision/tube_detector.py` | 已实现（彩盖锚点 + 细长轮廓 + 离线测试） |
+| `vision/rack_detector.py`、`vision/pixel_to_robot.py` | 占位 |
 | `robot/*.py` | 占位 |
 | `task/tube_task_manager.py` | 占位 |
-| `common/types.py` | 已实现（`Pose`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`；其余类型按需补充） |
-| `common/errors.py` | 已实现（`Nova2ProjectError`、`RecoverableError`、`FatalError`、`CalibrationError`） |
+| `common/types.py` | 已实现（`Pose`、`TubeDetection`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`；其余类型按需补充） |
+| `common/errors.py` | 已实现（`Nova2ProjectError`、`RecoverableError`、`FatalError`、`CalibrationError`、`VisionError`） |
 | `calibration/rack_calibration.py`、`calibration/rack_model.py` | 计划新增（阶段 8） |
 | `third_party/dobot_sdk/dobot_api.py` | 已迁入（厂商 SDK，版本待确认） |
 | `main.py` | 占位 |

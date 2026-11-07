@@ -66,6 +66,8 @@
 
 说明：`pixel_to_point` 只返回点，不返回姿态；抓取姿态由 `tube_to_grasp_pose` 负责。深度来源必须显式：外部深度给 `depth_mm`，否则用桌面平面。`hole_pixel_to_pose` 用于关闭“孔位像素 -> HolePose”的链路缺口；孔位朝向来自 `RackModel`，不在任务层计算矩阵。
 
+`detect_tubes` 约定：输入为**已去畸变**的 BGR 图（当前接口不接收 K/D，去畸变由相机/上层负责）；`TubeDetection.center_*_px` 为彩盖圆心到管底端的中点；`axis_u/axis_v` 为单位长轴，方向由**彩盖端指向管底端**，`angle_deg` 仅表示无向角度 `[0,180)`（图像 v 轴向下）。无目标返回 `[]`；图像非法抛 `VisionError(recoverable=False)`。
+
 ## 机器人层
 
 | 符号 / 签名 | 输入 | 输出 / 单位 | 异常 |

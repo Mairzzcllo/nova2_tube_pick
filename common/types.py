@@ -2,14 +2,15 @@
 
 功能：
     1. 定义项目内部统一的位姿类型 Pose（位置 mm，姿态 deg）
-    2. 定义手眼标定报告类型 HandEyeReport
-    3. 定义标定验证报告类型 TransformVerifyReport、ReprojectionReport
-    4. 定义相机数据源协议 CameraSource
-    5. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
+    2. 定义试管检测结果类型 TubeDetection
+    3. 定义手眼标定报告类型 HandEyeReport
+    4. 定义标定验证报告类型 TransformVerifyReport、ReprojectionReport
+    5. 定义相机数据源协议 CameraSource
+    6. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
 
 说明：
     本模块不得依赖 robot / vision / task。
-    其余共享类型（Point3D、TubeDetection 等）在对应模块实现时按需补充。
+    其余共享类型（Point3D、HolePixel 等）在对应模块实现时按需补充。
 """
 
 from dataclasses import dataclass
@@ -48,7 +49,38 @@ class Pose:
 
 
 # ============================================================
-# 2. 标定报告类型
+# 2. 视觉检测类型
+# ============================================================
+
+@dataclass(frozen=True)
+class TubeDetection:
+    """单支试管检测结果。
+
+    Args:
+        tube_id: 试管编号；由检测层按图像内位置稳定排序生成
+        center_u_px: 试管中心像素横坐标，pixel
+        center_v_px: 试管中心像素纵坐标，pixel
+        axis_u: 长轴单位向量 u 分量；方向由彩盖端指向管底端
+        axis_v: 长轴单位向量 v 分量；方向由彩盖端指向管底端
+        angle_deg: 长轴角度，范围 [0, 180)，图像坐标系（v 轴向下）
+        confidence: 检测置信度，范围 [0, 1]
+
+    说明：
+        axis_u/axis_v 保留方向信息，angle_deg 仅表示无向长轴角度。
+        下游计算抓取位姿时优先使用 axis_u/axis_v。
+    """
+
+    tube_id: str
+    center_u_px: float
+    center_v_px: float
+    axis_u: float
+    axis_v: float
+    angle_deg: float
+    confidence: float
+
+
+# ============================================================
+# 3. 标定报告类型
 # ============================================================
 
 @dataclass(frozen=True)
@@ -73,7 +105,7 @@ class HandEyeReport:
 
 
 # ============================================================
-# 3. 标定验证报告类型
+# 4. 标定验证报告类型
 # ============================================================
 
 @dataclass(frozen=True)
@@ -119,7 +151,7 @@ class ReprojectionReport:
 
 
 # ============================================================
-# 4. 相机数据源协议
+# 5. 相机数据源协议
 # ============================================================
 
 @runtime_checkable

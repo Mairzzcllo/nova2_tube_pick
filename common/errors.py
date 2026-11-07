@@ -4,6 +4,7 @@
     1. 定义项目异常基类 Nova2ProjectError
     2. 提供可恢复/致命两类语义异常 RecoverableError、FatalError
     3. 提供标定层业务异常 CalibrationError
+    4. 提供视觉层业务异常 VisionError
 
 说明：
     禁止使用裸 Exception。
@@ -56,6 +57,18 @@ class CalibrationError(Nova2ProjectError):
     Args:
         message: 异常描述
         recoverable: 样本不足/单次检测失败为 True；文件缺失/数据非法为 False
+    """
+
+    def __init__(self, message: str, recoverable: bool = True):
+        super().__init__(message, recoverable=recoverable)
+
+
+class VisionError(Nova2ProjectError):
+    """视觉业务异常。
+
+    Args:
+        message: 异常描述
+        recoverable: 未检测到目标/单帧失败为 True；图像非法/标定缺失为 False
     """
 
     def __init__(self, message: str, recoverable: bool = True):
