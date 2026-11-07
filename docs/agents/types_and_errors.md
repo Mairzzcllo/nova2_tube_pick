@@ -26,6 +26,8 @@ GraspStatus = Enum(GRASPED, NOT_GRASPED, UNKNOWN)
 
 `TaskState.status` 取值：`detected` / `picked` / `inserted` / `failed`。`TaskReport.success` 为成功数量，`failures` 为失败列表，`states` 为 `dict[str, TaskState]`。
 
+`TransformVerifyReport` 与 `ReprojectionReport` 使用 frozen dataclass；`per_point_errors_mm`、`per_view_errors_px` 使用 `tuple[float, ...]`。`ReprojectionReport.passed` 仅由最大像素误差判定，`rms_px` 仅作报告指标。
+
 模块私有类（`StateStore`、`RackModel`）放各自模块，不强行放进 `common`。
 
 ## Pose 与坐标约定

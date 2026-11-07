@@ -26,6 +26,8 @@
 
 说明：**重投影验证与 T_base_camera 验证分开**。`verify_transform` 不接收 `reproj_threshold_px`，避免职责混淆。
 
+`verify_reprojection` 的 `passed` 仅由 `max_error_px <= max_threshold_px` 判定；`rms_px` 仅作为报告指标，不参与 PASS/FAIL。`per_view_errors_px` 为每张有效视图的 RMS 重投影误差，`rms_px` 为全部有效角点的整体 RMS；两者不得互相替代。
+
 `pose_recorder` 的 `poses.json` 结构（供 `calibrate_handeye` 消费）：
 
 ```json

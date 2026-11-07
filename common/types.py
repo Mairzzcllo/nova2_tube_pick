@@ -3,8 +3,9 @@
 功能：
     1. 定义项目内部统一的位姿类型 Pose（位置 mm，姿态 deg）
     2. 定义手眼标定报告类型 HandEyeReport
-    3. 定义相机数据源协议 CameraSource
-    4. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
+    3. 定义标定验证报告类型 TransformVerifyReport、ReprojectionReport
+    4. 定义相机数据源协议 CameraSource
+    5. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
 
 说明：
     本模块不得依赖 robot / vision / task。
@@ -72,7 +73,53 @@ class HandEyeReport:
 
 
 # ============================================================
-# 3. 相机数据源协议
+# 3. 标定验证报告类型
+# ============================================================
+
+@dataclass(frozen=True)
+class TransformVerifyReport:
+    """相机到基座坐标变换验证报告。
+
+    Args:
+        n_points: 参与验证的测试点数量
+        per_point_errors_mm: 每个测试点的欧氏距离误差，mm
+        mean_error_mm: 全部测试点的平均误差，mm
+        max_error_mm: 全部测试点的最大误差，mm
+        passed: 是否同时满足平均误差与最大误差门槛
+        reason: PASS/FAIL 说明
+    """
+
+    n_points: int
+    per_point_errors_mm: tuple[float, ...]
+    mean_error_mm: float
+    max_error_mm: float
+    passed: bool
+    reason: str = ""
+
+
+@dataclass(frozen=True)
+class ReprojectionReport:
+    """相机内参重投影验证报告。
+
+    Args:
+        n_views: 有效棋盘格视图数量
+        rms_px: 全部有效角点的整体 RMS 重投影误差，pixel
+        max_error_px: 全部有效角点中的最大重投影误差，pixel
+        per_view_errors_px: 每张有效视图的 RMS 重投影误差，pixel
+        passed: 是否满足最大像素误差门槛
+        reason: PASS/FAIL 说明
+    """
+
+    n_views: int
+    rms_px: float
+    max_error_px: float
+    per_view_errors_px: tuple[float, ...]
+    passed: bool
+    reason: str = ""
+
+
+# ============================================================
+# 4. 相机数据源协议
 # ============================================================
 
 @runtime_checkable
