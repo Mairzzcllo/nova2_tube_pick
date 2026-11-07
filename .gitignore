@@ -14,3 +14,9 @@ config/camera_intrinsics.npz
 # 日志与临时文件
 *.log
 .DS_Store
+
+# 运行产物（不提交）
+data/logs/
+data/debug/
+data/handeye/
+data/task_state.json
