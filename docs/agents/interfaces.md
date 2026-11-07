@@ -26,6 +26,31 @@
 
 说明：**重投影验证与 T_base_camera 验证分开**。`verify_transform` 不接收 `reproj_threshold_px`，避免职责混淆。
 
+`pose_recorder` 的 `poses.json` 结构（供 `calibrate_handeye` 消费）：
+
+```json
+{
+  "version": 1,
+  "created_at": "ISO-8601",
+  "pattern_size": [9, 6],
+  "euler_convention": "fixed_xyz_rpy",
+  "robot_pose_units": {"position": "mm", "rotation": "deg"},
+  "samples": [
+    {
+      "sample_id": 0,
+      "timestamp": 1762500000.0,
+      "robot_pose": {"x_mm": 0.0, "y_mm": 0.0, "z_mm": 0.0,
+                     "rx_deg": 0.0, "ry_deg": 0.0, "rz_deg": 0.0},
+      "image_path": "images/000.png"
+    }
+  ]
+}
+```
+
+`image_path` 相对 `poses.json` 所在目录解析；`poses.json` 采用原子写入，检测失败的图像不落盘。
+
+手眼标定按 **eye-to-hand** 配置实现：相机固定在工作台，棋盘格刚性安装在机器人末端并随末端运动。求解时把机器人位姿取逆后传入 `cv2.calibrateHandEye` 的 `gripper2base` 参数，返回值即 `T_base_camera`。质量不达标时抛 `CalibrationError(recoverable=True)` 且不写 `T_base_camera.npy`，避免下游误用。
+
 ## 视觉层
 
 | 符号 / 签名 | 输入 | 输出 / 单位 | 异常 |

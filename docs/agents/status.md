@@ -7,13 +7,14 @@
 | 文件 | 状态 |
 |---|---|
 | `calibration/camera_calibration.py` | 已实现（CLI + 合成图自测） |
-| `calibration/pose_recorder.py` | 占位（NotImplementedError） |
-| `calibration/handeye_calibration.py` | 占位 |
+| `calibration/pose_recorder.py` | 已实现（交互式采集 + CLI + 离线测试） |
+| `calibration/handeye_calibration.py` | 已实现（eye-to-hand + CLI + 离线测试） |
 | `calibration/calibration_verify.py` | 占位 |
 | `vision/*.py` | 占位 |
 | `robot/*.py` | 占位 |
 | `task/tube_task_manager.py` | 占位 |
-| `common/types.py`、`common/errors.py` | 计划新增 |
+| `common/types.py` | 已实现（`Pose`、`HandEyeReport`、`CameraSource`；其余类型按需补充） |
+| `common/errors.py` | 已实现（`Nova2ProjectError`、`RecoverableError`、`FatalError`、`CalibrationError`） |
 | `calibration/rack_calibration.py`、`calibration/rack_model.py` | 计划新增（阶段 8） |
 | `third_party/dobot_sdk/dobot_api.py` | 已迁入（厂商 SDK，版本待确认） |
 | `main.py` | 占位 |
