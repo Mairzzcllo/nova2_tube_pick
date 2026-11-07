@@ -1,5 +1,6 @@
 # Nova 2 试管抓取项目 - 机器人/相机基础配置
 # 说明：此处为占位配置，实际参数请在标定与联调后填写。
+# 单位约定：长度统一 mm，角度统一 deg，图像尺寸 px。
 
 robot:
   ip: "192.168.1.100"        # Nova 2 控制柜 IP（占位）
@@ -8,8 +9,8 @@ robot:
 
 gripper:
   type: "parallel"           # 夹爪类型（占位）
-  open_width: 0.04           # 张开宽度 m（占位）
-  close_width: 0.01          # 闭合宽度 m（占位）
+  open_width_mm: 40.0        # 张开宽度 mm（占位）
+  close_width_mm: 10.0       # 闭合宽度 mm（占位）
 
 camera:
   intrinsics_file: "config/camera_intrinsics.npz"
@@ -22,5 +23,5 @@ calibration:
 
 task:
   tube_count: 3              # 连续任务试管数量（占位）
-  approach_height: 0.10      # 接近/抬升高度 m（占位）
+  approach_height_mm: 100.0  # 接近/抬升高度 mm（占位）
   insert_speed: 10           # 插入低速百分比（占位）

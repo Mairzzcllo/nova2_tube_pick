@@ -69,7 +69,7 @@ main.py        入口：加载配置与标定 -> 组装各模块 -> 启动作业
 
 - 代码注释、docstring、打印信息均用中文；变量/函数用 snake_case，类用 PascalCase。
 - 保持分层：`task` 不调 SDK、不算矩阵、不做识别；只有 `nova2_client` 接触 Nova 2 SDK；`vision` 不控制机械臂。
-- **单位不统一**：标定链路使用 **mm**（内参、`square_size`、`T_*` 平移）；`robot_config.yaml` 使用 **m**（`open_width`、`approach_height` 等）。新增代码务必显式注明单位并在边界处转换。
+- **单位统一为 mm**：全项目长度统一使用 **mm**（`robot_config.yaml`、`square_size`、`T_*` 平移、任务目标点），角度使用 **deg**。相机内参 `K` 的单位是 **pixel**、畸变 `D` 无量纲，与长度单位无关。变量/配置键带单位后缀（如 `approach_height_mm`）；只在 I/O 边界做转换（如厂商 SDK 若用其他单位），禁止单位混用。
 - 齐次变换约定：`T_base_camera` 表示相机 -> 基座；矩阵为 4x4，旋转 R 在上左 3x3，平移 t 在右上 3x1。
 - 欧拉角/位姿约定（TCP、User 坐标系、欧拉角顺序）必须集中封装，不要散落在各模块。
 - 抓取/插入必须先经过安全接近点，禁止从当前位置直接直线冲向目标；插入用低速。
