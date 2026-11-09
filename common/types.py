@@ -6,7 +6,8 @@
     3. 定义手眼标定报告类型 HandEyeReport
     4. 定义标定验证报告类型 TransformVerifyReport、ReprojectionReport
     5. 定义相机数据源协议 CameraSource
-    6. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
+    6. 定义夹爪状态 GraspStatus 与夹爪配置 GripperConfig
+    7. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
 
 说明：
     本模块不得依赖 robot / vision / task。
@@ -14,6 +15,7 @@
 """
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Protocol, runtime_checkable
 
 import numpy as np
@@ -165,3 +167,51 @@ class CameraSource(Protocol):
             shape 为 (H, W, 3) 的 BGR 图像数组；读取失败返回 None。
         """
         ...
+
+
+# ============================================================
+# 6. 夹爪类型
+# ============================================================
+
+class GraspStatus(Enum):
+    """夹爪夹持状态。
+
+    取值：
+        GRASPED: 已确认夹住物体
+        NOT_GRASPED: 已确认未夹住物体
+        UNKNOWN: 无反馈或反馈不可信，不得当作成功
+    """
+
+    GRASPED = "grasped"
+    NOT_GRASPED = "not_grasped"
+    UNKNOWN = "unknown"
+
+
+@dataclass(frozen=True)
+class GripperConfig:
+    """夹爪配置。
+
+    Args:
+        control_mode: 控制方式，取值 `tool_do` / `dual_do` / `serial` / `unknown`
+        open_do_index: 张开动作使用的末端 DO 编号（tool_do 模式）
+        close_do_index: 闭合动作使用的末端 DO 编号（dual_do 模式）
+        do_active_level: DO 有效电平，1 表示 ON，0 表示 OFF
+        feedback_di_index: 夹持反馈 DI 编号；None 表示无反馈
+        feedback_active_level: DI 反馈有效电平，1 表示 ON，0 表示 OFF
+        feedback_timeout_s: 等待反馈到位的超时，s（预留）
+        tool_power_required: 开合前是否需要打开末端工具电源
+
+    说明：
+        夹爪硬件协议尚未确定，`control_mode` 默认为 `unknown`。
+        在协议确定前，`GripperController` 对开合动作抛出 `GripperError`，
+        `is_grasped()` 返回 `GraspStatus.UNKNOWN`，不得假装成功。
+    """
+
+    control_mode: str = "unknown"
+    open_do_index: int | None = None
+    close_do_index: int | None = None
+    do_active_level: int = 1
+    feedback_di_index: int | None = None
+    feedback_active_level: int = 1
+    feedback_timeout_s: float = 2.0
+    tool_power_required: bool = False

@@ -100,8 +100,9 @@ tube_task_manager -> gripper_controller -> 夹爪
 ## 7. 当前实现状态与占位
 
 - `calibration/camera_calibration.py`、`calibration/pose_recorder.py`、`calibration/handeye_calibration.py`、`calibration/calibration_verify.py` 已实现（CLI/接口 + 合成图自测）。
-- `vision/tube_detector.py` 已实现（彩盖锚点 + 细长轮廓 + 离线测试）；`vision/rack_detector.py`、`vision/pixel_to_robot.py`、`robot/*.py`、`task/tube_task_manager.py`、`main.py` 仍为占位。
-- `common/types.py`（`Pose`、`TubeDetection`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`）、`common/errors.py`（含 `VisionError`）已实现；其余共享类型按需补充。`calibration/rack_calibration.py`、`calibration/rack_model.py` 为计划新增；`camera/` 驱动尚未实现。
+- `vision/tube_detector.py` 已实现（彩盖锚点 + 细长轮廓 + 离线测试）；`vision/rack_detector.py`、`vision/pixel_to_robot.py`、`robot/motion_controller.py`、`task/tube_task_manager.py`、`main.py` 仍为占位。
+- `robot/nova2_client.py` 已实现（连接/使能、状态读取、运动、反馈口、末端 IO）；`robot/gripper_controller.py` 已实现（`GraspStatus` + `GripperError`，当前仅 `tool_do` 模式，协议未定时安全降级）。
+- `common/types.py`（`Pose`、`TubeDetection`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`、`GraspStatus`、`GripperConfig`）、`common/errors.py`（含 `VisionError`、`GripperError`）已实现；其余共享类型按需补充。`calibration/rack_calibration.py`、`calibration/rack_model.py` 为计划新增；`camera/` 驱动尚未实现。
 - 完整状态表与约定见 [status.md](docs/agents/status.md)。
 
 ## 8. 按需参考

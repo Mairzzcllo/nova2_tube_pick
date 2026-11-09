@@ -12,6 +12,16 @@ gripper:
   type: "parallel"           # 夹爪类型（占位）
   open_width_mm: 40.0        # 张开宽度 mm（占位）
   close_width_mm: 10.0       # 闭合宽度 mm（占位）
+  # 控制协议尚未确定：tool_do / dual_do / serial / unknown
+  # unknown 模式下开合动作会抛 GripperError，is_grasped() 返回 UNKNOWN
+  control_mode: "unknown"
+  open_do_index: null        # 张开 DO 编号（tool_do 模式必填，占位）
+  close_do_index: null       # 闭合 DO 编号（dual_do 模式必填，占位）
+  do_active_level: 1         # DO 有效电平：1=ON，0=OFF
+  feedback_di_index: null    # 夹持反馈 DI 编号；null 表示无反馈
+  feedback_active_level: 1   # DI 反馈有效电平：1=ON，0=OFF
+  feedback_timeout_s: 2.0    # 等待反馈超时 s（预留）
+  tool_power_required: false # 开合前是否需要打开末端工具电源
 
 camera:
   intrinsics_file: "config/camera_intrinsics.npz"

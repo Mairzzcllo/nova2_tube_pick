@@ -6,6 +6,7 @@
     3. move_j / move_l 的速度参数映射
     4. 非零返回码与超时异常分类
     5. 基于反馈快照的停止判断与异常状态
+    6. 末端 DO/DI 与工具电源读写
 
 说明：
     不连接真实硬件；通过注入假 Dashboard 与手工快照验证纯逻辑。
@@ -38,6 +39,8 @@ class FakeDashboard:
         self.movj_calls = []
         self.movl_calls = []
         self.stop_calls = 0
+        self.tool_do_calls = []
+        self.tool_power_calls = []
 
     def GetPose(self):
         return "0,{10.0,20.0,30.0,1.0,2.0,3.0},GetPose();"
@@ -59,6 +62,24 @@ class FakeDashboard:
     def Stop(self):
         self.stop_calls += 1
         return "0,{},Stop();"
+
+    def ToolDO(self, index, status):
+        self.tool_do_calls.append(("queue", index, status))
+        return "0,{},ToolDO();"
+
+    def ToolDOInstant(self, index, status):
+        self.tool_do_calls.append(("instant", index, status))
+        return "0,{},ToolDOInstant();"
+
+    def GetToolDO(self, index):
+        return "0,{1},GetToolDO();"
+
+    def ToolDI(self, index):
+        return "0,{0},ToolDI();"
+
+    def SetToolPower(self, status):
+        self.tool_power_calls.append(status)
+        return "0,{},SetToolPower();"
 
 
 def build_client(feedback_port=None):
@@ -263,7 +284,45 @@ def test_build_snapshot():
 
 
 # ============================================================
-# 6. 入口
+# 6. 末端 IO 测试
+# ============================================================
+
+def test_tool_io_commands():
+    """验证末端 DO/DI 与工具电源读写。"""
+
+    client = build_client()
+
+    client.set_tool_do(2, True)
+    assert client._dashboard.tool_do_calls[-1] == ("instant", 2, 1)
+
+    client.set_tool_do(0, False, immediate=False)
+    assert client._dashboard.tool_do_calls[-1] == ("queue", 0, 0)
+
+    assert client.read_tool_do(1) is True
+    assert client.read_tool_di(1) is False
+
+    client.set_tool_power(True)
+    client.set_tool_power(False)
+    assert client._dashboard.tool_power_calls == [1, 0]
+
+    for bad_index in (-1, "1", True):
+        try:
+            client.set_tool_do(bad_index, True)
+            raise AssertionError(f"非法 IO 编号未抛异常：{bad_index!r}")
+        except ValueError:
+            pass
+
+    try:
+        client.set_tool_do(1, 1)
+        raise AssertionError("非 bool 电平未抛异常")
+    except ValueError:
+        pass
+
+    print("[PASS] 末端 IO 读写")
+
+
+# ============================================================
+# 7. 入口
 # ============================================================
 
 def main() -> None:
@@ -277,6 +336,7 @@ def main() -> None:
     test_wait_until_stopped_feedback()
     test_wait_until_stopped_errors()
     test_build_snapshot()
+    test_tool_io_commands()
     print("Nova2Client 离线测试全部通过")
 
 

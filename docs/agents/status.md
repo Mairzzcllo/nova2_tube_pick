@@ -12,10 +12,12 @@
 | `calibration/calibration_verify.py` | 已实现（接口迁移 + 离线测试） |
 | `vision/tube_detector.py` | 已实现（彩盖锚点 + 细长轮廓 + 离线测试） |
 | `vision/rack_detector.py`、`vision/pixel_to_robot.py` | 占位 |
-| `robot/*.py` | 占位 |
+| `robot/nova2_client.py` | 已实现（连接/使能、状态读取、运动、反馈口、末端 IO） |
+| `robot/gripper_controller.py` | 已实现（`GraspStatus` + `GripperError`；仅 `tool_do` 模式，协议未定时安全降级） |
+| `robot/motion_controller.py` | 占位 |
 | `task/tube_task_manager.py` | 占位 |
-| `common/types.py` | 已实现（`Pose`、`TubeDetection`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`；其余类型按需补充） |
-| `common/errors.py` | 已实现（`Nova2ProjectError`、`RecoverableError`、`FatalError`、`CalibrationError`、`VisionError`） |
+| `common/types.py` | 已实现（`Pose`、`TubeDetection`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`、`GraspStatus`、`GripperConfig`；其余类型按需补充） |
+| `common/errors.py` | 已实现（`Nova2ProjectError`、`RecoverableError`、`FatalError`、`CalibrationError`、`VisionError`、`GripperError`） |
 | `calibration/rack_calibration.py`、`calibration/rack_model.py` | 计划新增（阶段 8） |
 | `third_party/dobot_sdk/dobot_api.py` | 已迁入（厂商 SDK，版本待确认） |
 | `main.py` | 占位 |

@@ -5,6 +5,7 @@
     2. 提供可恢复/致命两类语义异常 RecoverableError、FatalError
     3. 提供标定层业务异常 CalibrationError
     4. 提供视觉层业务异常 VisionError
+    5. 提供夹爪层业务异常 GripperError
 
 说明：
     禁止使用裸 Exception。
@@ -72,4 +73,20 @@ class VisionError(Nova2ProjectError):
     """
 
     def __init__(self, message: str, recoverable: bool = True):
+        super().__init__(message, recoverable=recoverable)
+
+
+class GripperError(Nova2ProjectError):
+    """夹爪业务异常。
+
+    Args:
+        message: 异常描述
+        recoverable: 单次开合超时/可重试故障为 True；通信失败/协议未配置为 False
+
+    说明：
+        无反馈不是异常，调用方应通过 `GraspStatus.UNKNOWN` 判断，
+        不得把无反馈当作夹持成功。
+    """
+
+    def __init__(self, message: str, recoverable: bool = False):
         super().__init__(message, recoverable=recoverable)

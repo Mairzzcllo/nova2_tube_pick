@@ -5,7 +5,8 @@
     2. 提供末端位姿、关节角读取
     3. 提供关节/直线运动指令（速度比例 1..100）
     4. 通过反馈口高频数据判断机械臂是否停止
-    5. 把 SDK 原始返回与异常转换为项目统一类型和异常
+    5. 提供末端 IO 读写（DO/DI 与工具电源），供夹爪层使用
+    6. 把 SDK 原始返回与异常转换为项目统一类型和异常
 
 说明：
     - 本模块是唯一允许 import `third_party/dobot_sdk/dobot_api.py` 的边界。
@@ -620,7 +621,105 @@ class Nova2Client:
         self._check_reply(self._dashboard.Stop(), "停止运动")
 
     # --------------------------------------------------------
-    # 3.5 内部校验与解析
+    # 3.5 末端 IO（夹爪等）
+    # --------------------------------------------------------
+
+    def set_tool_do(self, index: int, on: bool, immediate: bool = True) -> None:
+        """设置末端数字输出口状态。
+
+        Args:
+            index: 末端 DO 编号，非负整数
+            on: True 表示 ON(1)，False 表示 OFF(0)
+            immediate: True 使用立即指令，False 使用队列指令
+
+        Raises:
+            ValueError: DO 编号或电平非法
+            FatalError: 未连接或指令失败
+            RecoverableError: 指令返回超时
+
+        说明：
+            夹爪通常需要立即生效，默认使用 `ToolDOInstant`；
+            若需要与运动队列严格同步，可传 `immediate=False`。
+        """
+
+        self._ensure_connected()
+        do_index = self._validate_io_index(index, "tool_do")
+        status = self._bool_to_level(on, "on")
+        command = (
+            self._dashboard.ToolDOInstant
+            if immediate
+            else self._dashboard.ToolDO
+        )
+        reply = command(do_index, status)
+        self._check_reply(reply, "tool_do")
+
+    def read_tool_do(self, index: int) -> bool:
+        """读取末端数字输出口状态。
+
+        Args:
+            index: 末端 DO 编号，非负整数
+
+        Returns:
+            True 表示 ON，False 表示 OFF
+
+        Raises:
+            ValueError: DO 编号非法
+            FatalError: 未连接、返回为空或格式无法解析
+        """
+
+        self._ensure_connected()
+        do_index = self._validate_io_index(index, "read_tool_do")
+        payload = self._check_reply(
+            self._dashboard.GetToolDO(do_index), "读取末端 DO"
+        )
+        values = self._extract_numbers(payload)
+        return values[0] != 0
+
+    def read_tool_di(self, index: int) -> bool:
+        """读取末端数字输入口状态。
+
+        Args:
+            index: 末端 DI 编号，非负整数
+
+        Returns:
+            True 表示 ON，False 表示 OFF
+
+        Raises:
+            ValueError: DI 编号非法
+            FatalError: 未连接、返回为空或格式无法解析
+        """
+
+        self._ensure_connected()
+        di_index = self._validate_io_index(index, "read_tool_di")
+        payload = self._check_reply(
+            self._dashboard.ToolDI(di_index), "读取末端 DI"
+        )
+        values = self._extract_numbers(payload)
+        return values[0] != 0
+
+    def set_tool_power(self, on: bool) -> None:
+        """设置末端工具电源状态。
+
+        Args:
+            on: True 表示上电，False 表示断电
+
+        Raises:
+            ValueError: 电平非法
+            FatalError: 未连接或指令失败
+            RecoverableError: 指令返回超时
+
+        说明：
+            部分电动夹爪需要重新上电初始化；`identify` 参数暂用默认值，
+            实机确认后再决定是否暴露。
+        """
+
+        self._ensure_connected()
+        status = self._bool_to_level(on, "on")
+        reply = self._dashboard.SetToolPower(status)
+        self._check_reply(reply, "设置末端工具电源")
+
+    # --------------------------------------------------------
+    # 3.6 内部校验与解析
     # --------------------------------------------------------
 
     def _ensure_connected(self) -> None:
@@ -708,6 +807,32 @@ class Nova2Client:
             )
 
         return value
+
+    @staticmethod
+    def _validate_io_index(index: int, name: str) -> int:
+        """校验末端 IO 编号。
+
+        Raises:
+            ValueError: 不是非负整数
+        """
+
+        if isinstance(index, bool) or not isinstance(index, int) or index < 0:
+            raise ValueError(f"{name} 的 IO 编号必须是非负整数，当前为 {index!r}")
+
+        return index
+
+    @staticmethod
+    def _bool_to_level(value: bool, name: str) -> int:
+        """把布尔电平转换为 SDK 需要的 1/0。
+
+        Raises:
+            ValueError: 入参不是 bool
+        """
+
+        if not isinstance(value, bool):
+            raise ValueError(f"{name} 必须是 bool，当前为 {type(value).__name__}")
+
+        return 1 if value else 0
 
     @staticmethod
     def _parse_reply(reply: str) -> tuple[int, str]:
