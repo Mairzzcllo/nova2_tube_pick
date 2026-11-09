@@ -60,11 +60,14 @@
 | `detect_tubes(image) -> list[TubeDetection]` | BGR 图 | `TubeDetection` 列表；无目标返回 `[]` | `VisionError`；不得伪造 |
 | `detect_rack(image) -> RackDetection` | BGR 图 | `valid=False` + `reason` 表示失败 | `VisionError`；不得返回假孔位 |
 | `PixelToRobot(intrinsics, T_base_camera_mm, plane)` | K/D、T_BC、相机系桌面平面 | — | 标定缺失 `FatalError` |
+| `plane_from_base_table_z(T_base_camera_mm, table_z_mm) -> Plane` | 4x4 手眼矩阵；桌面基座高度 mm | 相机系桌面平面 | 矩阵/高度非法 `FatalError` |
 | `PixelToRobot.pixel_to_point(u, v, depth_mm=None) -> Point3D` | 像素；`depth_mm` 为相机系 Z；`None` 时与 `plane` 求交 | 基座坐标 mm | 射线与平面不相交/深度非法 `ValueError` |
 | `PixelToRobot.tube_to_grasp_pose(tube, tube_geometry) -> Pose` | `TubeDetection` + 管径/管长/夹持偏移 | 基座抓取位姿 mm/deg | 几何非法 `ValueError` |
 | `PixelToRobot.hole_pixel_to_pose(hole: HolePixel, rack_model: RackModel) -> HolePose` | 孔位像素 + `RackModel` | 基座孔位 mm/deg | 标定缺失 `FatalError`；孔位不匹配 `ValueError` |
 
 说明：`pixel_to_point` 只返回点，不返回姿态；抓取姿态由 `tube_to_grasp_pose` 负责。深度来源必须显式：外部深度给 `depth_mm`，否则用桌面平面。`hole_pixel_to_pose` 用于关闭“孔位像素 -> HolePose”的链路缺口；孔位朝向来自 `RackModel`，不在任务层计算矩阵。
+
+`PixelToRobot` 输入图像默认已完成去畸变，`pixel_to_point` 只用 `K` 反投影，`D` 仅参与构造校验。`plane_from_base_table_z` 由 `T_base_camera` 与桌面基座高度生成相机系平面，供 `main.py` 组装时使用。
 
 `detect_tubes` 约定：输入为**已去畸变**的 BGR 图（当前接口不接收 K/D，去畸变由相机/上层负责）；`TubeDetection.center_*_px` 为彩盖圆心到管底端的中点；`axis_u/axis_v` 为单位长轴，方向由**彩盖端指向管底端**，`angle_deg` 仅表示无向角度 `[0,180)`（图像 v 轴向下）。无目标返回 `[]`；图像非法抛 `VisionError(recoverable=False)`。
 

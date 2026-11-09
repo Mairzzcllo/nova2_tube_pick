@@ -31,6 +31,9 @@ camera:
 calibration:
   T_base_camera_file: "config/T_base_camera.npy"
   T_base_rack_file: "config/T_base_rack.npy"
+  # 桌面在基座坐标系下的 Z 高度，mm（占位；阶段 4 标定后填写）
+  # 仅用于由 T_base_camera 生成相机系桌面平面
+  table_z_mm: 0.0
 
 task:
   tube_count: 3              # 连续任务试管数量（占位）

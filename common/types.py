@@ -2,16 +2,17 @@
 
 功能：
     1. 定义项目内部统一的位姿类型 Pose（位置 mm，姿态 deg）
-    2. 定义试管检测结果类型 TubeDetection
-    3. 定义手眼标定报告类型 HandEyeReport
-    4. 定义标定验证报告类型 TransformVerifyReport、ReprojectionReport
-    5. 定义相机数据源协议 CameraSource
-    6. 定义夹爪状态 GraspStatus 与夹爪配置 GripperConfig
-    7. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
+    2. 定义三维点 Point3D 与相机系平面 Plane
+    3. 定义试管检测结果类型 TubeDetection、孔位像素 HolePixel
+    4. 定义试管几何 TubeGeometry 与孔位位姿 HolePose
+    5. 定义手眼标定报告类型 HandEyeReport
+    6. 定义标定验证报告类型 TransformVerifyReport、ReprojectionReport
+    7. 定义相机数据源协议 CameraSource
+    8. 定义夹爪状态 GraspStatus 与夹爪配置 GripperConfig
+    9. 提供各层共用的最小数据结构，避免 robot/vision/task 相互依赖
 
 说明：
     本模块不得依赖 robot / vision / task。
-    其余共享类型（Point3D、HolePixel 等）在对应模块实现时按需补充。
 """
 
 from dataclasses import dataclass
@@ -22,8 +23,45 @@ import numpy as np
 
 
 # ============================================================
-# 1. 位姿类型
+# 1. 位姿与几何类型
 # ============================================================
+
+@dataclass(frozen=True)
+class Point3D:
+    """三维点，单位 mm。
+
+    Args:
+        x_mm: X 坐标，mm
+        y_mm: Y 坐标，mm
+        z_mm: Z 坐标，mm
+    """
+
+    x_mm: float
+    y_mm: float
+    z_mm: float
+
+
+@dataclass(frozen=True)
+class Plane:
+    """平面方程 a*x + b*y + c*z + d = 0。
+
+    Args:
+        a: X 法向分量
+        b: Y 法向分量
+        c: Z 法向分量
+        d: 平面常数项
+        frame: 平面所在坐标系，当前仅支持 `camera`
+
+    说明：
+        (a, b, c) 不要求归一化，使用前由消费方统一归一化。
+    """
+
+    a: float
+    b: float
+    c: float
+    d: float
+    frame: str = "camera"
+
 
 @dataclass(frozen=True)
 class Pose:
@@ -79,6 +117,50 @@ class TubeDetection:
     axis_v: float
     angle_deg: float
     confidence: float
+
+
+@dataclass(frozen=True)
+class TubeGeometry:
+    """试管几何参数。
+
+    Args:
+        diameter_mm: 管身直径，mm
+        length_mm: 管身长度，mm
+        grasp_offset_mm: 夹持点相对检测中心的偏移，mm；
+            正方向沿长轴由彩盖端指向管底端
+    """
+
+    diameter_mm: float
+    length_mm: float
+    grasp_offset_mm: float
+
+
+@dataclass(frozen=True)
+class HolePixel:
+    """孔位像素坐标。
+
+    Args:
+        hole_id: 孔位编号
+        u_px: 孔位中心像素横坐标，pixel
+        v_px: 孔位中心像素纵坐标，pixel
+    """
+
+    hole_id: str
+    u_px: float
+    v_px: float
+
+
+@dataclass(frozen=True)
+class HolePose:
+    """机器人基坐标系下的孔位位姿。
+
+    Args:
+        hole_id: 孔位编号
+        pose_base: 基座位姿，位置 mm、姿态 deg
+    """
+
+    hole_id: str
+    pose_base: Pose
 
 
 # ============================================================
