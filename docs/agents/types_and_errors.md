@@ -57,5 +57,5 @@ GraspStatus = Enum(GRASPED, NOT_GRASPED, UNKNOWN)
 ## 其它相关类型
 
 - `CameraSource` 协议：`read() -> np.ndarray`，计划定义在 `common/types.py`；具体相机驱动（建议 `camera/camera.py`）尚未实现，接入前不得假设品牌。
-- `AppConfig`：`config/robot_config.yaml` 的解析结果，字段至少覆盖 robot/gripper/camera/calibration/task/acceptance。
-- `CalibrationBundle`：至少包含 `K`、`D`、`T_base_camera_mm`、`T_base_rack_mm`、`RackModel`、加载时间。
+- `AppConfig`：`config/robot_config.yaml` 的解析结果，字段至少覆盖 robot/gripper/camera/calibration/task/acceptance；定义在 `common/app.py`。
+- `CalibrationBundle`：至少包含 `K`、`D`、`T_base_camera_mm`、`T_base_rack_mm`、`RackModel`、加载时间；定义在 `common/app.py`，`rack_model` 阶段 8 前允许为 `None`。

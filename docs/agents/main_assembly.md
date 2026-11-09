@@ -11,7 +11,9 @@ Pipeline.run(tube_count=3) -> TaskReport
 
 ## 职责与约束
 
-- `load_calibration` 必须校验文件存在、npz `rms` 字段、修改时间；缺失/过期抛 `FatalError`，不得加载占位矩阵。
+- `AppConfig`、`CalibrationBundle` 定义在 `common/app.py`，入口只做加载与校验。
+- `load_calibration` 必须校验文件存在、npz `rms` 字段、文件天龄 `calibration.max_age_days`，并要求标定文件修改时间不早于 `robot_config.yaml`；缺失/过期抛 `FatalError`，不得加载占位矩阵。
+- `build_pipeline` 在 `camera is None` 时直接抛 `FatalError`；相机驱动未就绪时由 `_create_camera()` 抛 `FatalError`。
 - 阶段 8 前 `T_base_rack` 可能不存在：此时 `CalibrationBundle.rack_model` 允许为 `None`，只能执行到阶段 7 的抓取测试；任何插入任务必须要求 `rack_model` 非空，否则抛 `FatalError`。
 - `build_pipeline` 负责创建 `Nova2Client`、`MotionController`、`GripperController`、视觉模块、`PixelToRobot`、`StateStore`、`TubeTaskManager`；`main.py` 不写识别/矩阵/运动算法。
 - `CameraSource` 协议（`read() -> np.ndarray`）计划定义在 `common/types.py`；具体相机驱动（建议 `camera/camera.py`）尚未实现，接入前不得假设品牌。

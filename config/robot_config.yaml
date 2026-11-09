@@ -34,6 +34,8 @@ calibration:
   # 桌面在基座坐标系下的 Z 高度，mm（占位；阶段 4 标定后填写）
   # 仅用于由 T_base_camera 生成相机系桌面平面
   table_z_mm: 0.0
+  # 标定文件允许的最大天龄；null 表示只做“不早于配置文件修改时间”校验
+  max_age_days: 30
 
 task:
   tube_count: 3              # 连续任务试管数量（占位）

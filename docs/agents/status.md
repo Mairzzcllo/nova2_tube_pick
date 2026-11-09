@@ -19,9 +19,10 @@
 | `task/tube_task_manager.py` | 占位 |
 | `common/types.py` | 已实现（`Point3D`、`Plane`、`Pose`、`TubeDetection`、`TubeGeometry`、`HolePixel`、`HolePose`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`、`GraspStatus`、`GripperConfig`；其余类型按需补充） |
 | `common/errors.py` | 已实现（`Nova2ProjectError`、`RecoverableError`、`FatalError`、`CalibrationError`、`VisionError`、`GripperError`） |
+| `common/app.py` | 已实现（`AppConfig`、`CalibrationBundle`、robot/camera/calibration/task/acceptance 分段配置） |
 | `calibration/rack_calibration.py`、`calibration/rack_model.py` | 计划新增（阶段 8） |
 | `third_party/dobot_sdk/dobot_api.py` | 已迁入（厂商 SDK，版本待确认） |
-| `main.py` | 占位 |
+| `main.py` | 已实现（配置加载、标定校验、日志、流水线组装骨架、`--dry-run`；任务层/相机驱动未就绪时组装抛 `FatalError`） |
 
 ## 代码约定
 

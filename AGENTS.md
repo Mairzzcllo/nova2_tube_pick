@@ -24,7 +24,7 @@ Nova 2 机械臂试管抓取/归位项目。核心思想：标定、视觉、坐
 | `vision/` | `tube_detector`、`rack_detector`、`pixel_to_robot` |
 | `robot/` | `nova2_client`（唯一 SDK 边界）、`motion_controller`、`gripper_controller` |
 | `task/` | `tube_task_manager`（FSM 调度，不写算法） |
-| `common/` | 跨层类型与异常（计划新增：`types.py`、`errors.py`） |
+| `common/` | 跨层类型、异常与应用级配置（`types.py`、`errors.py`、`app.py`） |
 | `camera/` | 相机驱动（计划新增，品牌待定） |
 | `third_party/` | 厂商 SDK；Nova 2 SDK 位于 `third_party/dobot_sdk/dobot_api.py` |
 | `debug/` | 独立验证脚本，脚本内用 `assert`；非 pytest 用例 |
@@ -100,9 +100,10 @@ tube_task_manager -> gripper_controller -> 夹爪
 ## 7. 当前实现状态与占位
 
 - `calibration/camera_calibration.py`、`calibration/pose_recorder.py`、`calibration/handeye_calibration.py`、`calibration/calibration_verify.py` 已实现（CLI/接口 + 合成图自测）。
-- `vision/tube_detector.py` 已实现（彩盖锚点 + 细长轮廓 + 离线测试）；`vision/pixel_to_robot.py` 已实现（反投影 + 抓取位姿 + 孔位位姿 + 离线测试，抓取工具朝向为占位常量）；`vision/rack_detector.py`、`task/tube_task_manager.py`、`main.py` 仍为占位。
+- `vision/tube_detector.py` 已实现（彩盖锚点 + 细长轮廓 + 离线测试）；`vision/pixel_to_robot.py` 已实现（反投影 + 抓取位姿 + 孔位位姿 + 离线测试，抓取工具朝向为占位常量）；`vision/rack_detector.py`、`task/tube_task_manager.py` 仍为占位。
+- `main.py` 已实现配置加载、标定校验、日志与流水线组装骨架；`build_pipeline` 只组装，连接由 `Pipeline.connect()` 负责。任务层 `StateStore`/`TaskContext`、视觉检测门面与 `camera/` 驱动未就绪时，组装会抛 `FatalError`；`--dry-run` 可在不连接硬件时校验配置与标定。
 - `robot/nova2_client.py` 已实现（连接/使能、状态读取、运动、反馈口、运动启动/停止等待、末端 IO）；`robot/motion_controller.py` 已实现（`move_to` / `move_linear` / `wait_arrival` + 到位容差 + 离线测试）；`robot/gripper_controller.py` 已实现（`GraspStatus` + `GripperError`，当前仅 `tool_do` 模式，协议未定时安全降级）。
-- `common/types.py`（`Point3D`、`Plane`、`Pose`、`TubeDetection`、`TubeGeometry`、`HolePixel`、`HolePose`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`、`GraspStatus`、`GripperConfig`）、`common/errors.py`（含 `VisionError`、`GripperError`）已实现；其余共享类型按需补充。`calibration/rack_calibration.py`、`calibration/rack_model.py` 为计划新增；`camera/` 驱动尚未实现。
+- `common/types.py`（`Point3D`、`Plane`、`Pose`、`TubeDetection`、`TubeGeometry`、`HolePixel`、`HolePose`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`、`GraspStatus`、`GripperConfig`）、`common/errors.py`（含 `VisionError`、`GripperError`）、`common/app.py`（`AppConfig`、`CalibrationBundle` 及分段配置）已实现；其余共享类型按需补充。`calibration/rack_calibration.py`、`calibration/rack_model.py` 为计划新增；`camera/` 驱动尚未实现。
 - 完整状态表与约定见 [status.md](docs/agents/status.md)。
 
 ## 8. 按需参考
