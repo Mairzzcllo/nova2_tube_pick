@@ -72,11 +72,13 @@
 
 | 符号 / 签名 | 输入 | 输出 / 单位 | 异常 |
 |---|---|---|---|
-| `Nova2Client(ip, port)`；`connect()` / `disconnect()` / `get_pose() -> Pose` / `get_joint_angles() -> tuple[float, ...]` / `move_j(pose, velocity_ratio_pct)` / `move_l(pose, velocity_ratio_pct)` / `wait_until_stopped(timeout_s) -> bool` / `stop()` | 连接参数；位姿 mm/deg | 对外统一 mm/deg；关节角 deg | SDK 异常转 `FatalError`/`RecoverableError`；单位与欧拉角转换只在此层 |
+| `Nova2Client(ip, port, feedback_port=30004)`；`connect()` / `disconnect()` / `get_pose() -> Pose` / `get_joint_angles() -> tuple[float, ...]` / `move_j(pose, velocity_ratio_pct)` / `move_l(pose, velocity_ratio_pct)` / `wait_until_stopped(timeout_s) -> bool` / `stop()` | 连接参数；位姿 mm/deg | 对外统一 mm/deg；关节角 deg | SDK 异常转 `FatalError`/`RecoverableError`；单位与欧拉角转换只在此层 |
 | `MotionController(client)`；`move_to(pose, velocity_ratio_pct=50)` / `move_linear(pose, velocity_ratio_pct=10)` / `wait_arrival(timeout_s=10.0) -> bool` | `Pose` mm/deg | 到位 bool | `wait_arrival` 返回 bool；`move_to`/`move_linear` 超时抛 `RecoverableError`；限位/未使能抛 `FatalError` |
 | `GripperController(client)`；`open()` / `close()` / `is_grasped() -> GraspStatus` | — | `GRASPED` / `NOT_GRASPED` / `UNKNOWN` | 无反馈返回 `UNKNOWN`，不得假装成功；通信失败 `GripperError` |
 
 说明：`velocity_ratio_pct` 为厂商速度百分比 `1..100`，不是 mm/s。若要物理速度，必须在 `Nova2Client` 做映射并实测标定，业务层不得自行换算。
+
+`connect()` 自动调用 `EnableRobot` 使能机械臂；`feedback_port` 为可选反馈口，默认 `30004`，传 `None` 关闭。反馈口可用时 `wait_until_stopped` 使用反馈高频数据，不可用时回退到 Dashboard 状态轮询。
 
 `Nova2Client.move_j` 参数语义**待 SDK 确认**：UML 提议 `move_j(joint_angles_deg, velocity_ratio_pct)`，当前契约保留 `move_j(pose, velocity_ratio_pct)`。若 Nova 2 SDK 的 MovJ 只接受关节角，则在 `Nova2Client` 内完成 Pose/关节角转换，或新增 `move_joints(...)`，不改变 `MotionController` 的 `Pose` 接口。
 
