@@ -13,9 +13,9 @@
 | `vision/tube_detector.py` | 已实现（彩盖锚点 + 细长轮廓 + 离线测试） |
 | `vision/pixel_to_robot.py` | 已实现（反投影 + 抓取位姿 + 孔位位姿 + 离线测试；抓取工具朝向为占位常量） |
 | `vision/rack_detector.py` | 占位 |
-| `robot/nova2_client.py` | 已实现（连接/使能、状态读取、运动、反馈口、末端 IO） |
+| `robot/nova2_client.py` | 已实现（连接/使能、状态读取、运动、反馈口、运动启动/停止等待、末端 IO） |
 | `robot/gripper_controller.py` | 已实现（`GraspStatus` + `GripperError`；仅 `tool_do` 模式，协议未定时安全降级） |
-| `robot/motion_controller.py` | 占位 |
+| `robot/motion_controller.py` | 已实现（move_to / move_linear / wait_arrival + 到位容差 + 离线测试） |
 | `task/tube_task_manager.py` | 占位 |
 | `common/types.py` | 已实现（`Point3D`、`Plane`、`Pose`、`TubeDetection`、`TubeGeometry`、`HolePixel`、`HolePose`、`HandEyeReport`、`TransformVerifyReport`、`ReprojectionReport`、`CameraSource`、`GraspStatus`、`GripperConfig`；其余类型按需补充） |
 | `common/errors.py` | 已实现（`Nova2ProjectError`、`RecoverableError`、`FatalError`、`CalibrationError`、`VisionError`、`GripperError`） |

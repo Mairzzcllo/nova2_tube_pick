@@ -41,6 +41,7 @@ class FakeDashboard:
         self.stop_calls = 0
         self.tool_do_calls = []
         self.tool_power_calls = []
+        self.robot_mode = 5
 
     def GetPose(self):
         return "0,{10.0,20.0,30.0,1.0,2.0,3.0},GetPose();"
@@ -49,7 +50,7 @@ class FakeDashboard:
         return "0,{1.0,2.0,3.0,4.0,5.0,6.0},GetAngle();"
 
     def RobotMode(self):
-        return "0,{5},RobotMode();"
+        return f"0,{{{self.robot_mode}}},RobotMode();"
 
     def MovJ(self, *args, **kwargs):
         self.movj_calls.append((args, kwargs))
@@ -264,6 +265,65 @@ def test_wait_until_stopped_errors():
     print("[PASS] 反馈异常状态处理")
 
 
+def test_wait_until_moving_feedback():
+    """验证反馈快照下的运动启动判断。"""
+
+    client = build_client()
+    client._feedback = object()
+
+    client._snapshot = build_snapshot(robot_mode=7, speed=(0.0, 0.0, 0.0))
+    assert client.wait_until_moving(0.5) is True
+
+    client._snapshot = build_snapshot(robot_mode=8, speed=(0.0, 0.0, 0.0))
+    assert client.wait_until_moving(0.5) is True
+
+    client._snapshot = build_snapshot(robot_mode=5, speed=(5.0, 0.0, 0.0))
+    assert client.wait_until_moving(0.5) is True
+
+    client._snapshot = build_snapshot(robot_mode=5, speed=(0.0, 0.0, 0.0))
+    assert client.wait_until_moving(0.05) is False
+
+    print("[PASS] 反馈快照运动启动判断")
+
+
+def test_wait_until_moving_fallback_and_errors():
+    """验证无反馈口回退、异常状态与超时校验。"""
+
+    client = build_client()
+
+    client._dashboard.robot_mode = 8
+    assert client.wait_until_moving(0.5) is True
+
+    client._dashboard.robot_mode = 7
+    assert client.wait_until_moving(0.5) is True
+
+    client._dashboard.robot_mode = 5
+    assert client.wait_until_moving(0.05) is False
+
+    client._dashboard.robot_mode = 9
+    try:
+        client.wait_until_moving(0.5)
+        raise AssertionError("异常状态应抛 FatalError")
+    except FatalError:
+        pass
+
+    client._dashboard.robot_mode = 4
+    try:
+        client.wait_until_moving(0.5)
+        raise AssertionError("未使能应抛 FatalError")
+    except FatalError:
+        pass
+
+    for bad in (0, -1, "2"):
+        try:
+            client.wait_until_moving(bad)
+            raise AssertionError(f"非法超时未抛异常：{bad!r}")
+        except ValueError:
+            pass
+
+    print("[PASS] 无反馈回退与运动启动异常")
+
+
 def test_build_snapshot():
     """验证反馈帧到快照的字段提取与速度模长。"""
 
@@ -335,6 +395,8 @@ def main() -> None:
     test_reply_error_mapping()
     test_wait_until_stopped_feedback()
     test_wait_until_stopped_errors()
+    test_wait_until_moving_feedback()
+    test_wait_until_moving_fallback_and_errors()
     test_build_snapshot()
     test_tool_io_commands()
     print("Nova2Client 离线测试全部通过")

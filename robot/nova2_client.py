@@ -92,6 +92,9 @@ DEFAULT_MOVE_LINEAR_VELOCITY_PCT = 10
 # 默认等待停止超时，单位 s
 DEFAULT_STOP_TIMEOUT_S = 10.0
 
+# 默认等待运动启动超时，单位 s
+DEFAULT_MOVE_START_TIMEOUT_S = 2.0
+
 
 # ============================================================
 # 2. 内部反馈快照
@@ -602,6 +605,71 @@ class Nova2Client:
                     raise FatalError("Nova 2 在运动过程中变为未使能状态")
 
                 if mode == ROBOT_MODE_ENABLE:
+                    return True
+
+            time.sleep(WAIT_POLL_INTERVAL_S)
+
+        return False
+
+    def wait_until_moving(
+        self,
+        timeout_s: float = DEFAULT_MOVE_START_TIMEOUT_S,
+    ) -> bool:
+        """等待机械臂进入运动状态。
+
+        Args:
+            timeout_s: 超时时间，s
+
+        Returns:
+            True 表示已进入运动状态；False 表示超时仍处于空闲
+
+        Raises:
+            FatalError: 未连接、进入异常状态、未使能或反馈中断
+
+        说明：
+            该方法是 `wait_until_stopped` 的启动配对，用于避免运动指令刚下发、
+            机械臂尚未启动时被误判为“已到位”。
+            反馈口可用时依据 `RobotMode` 与 `TCPSpeedActual`；
+            不可用时回退到 Dashboard 状态轮询。
+        """
+
+        self._ensure_connected()
+
+        if not isinstance(timeout_s, (int, float)) or timeout_s <= 0:
+            raise ValueError(f"timeout_s 必须为正数，当前为 {timeout_s!r}")
+
+        deadline = time.monotonic() + float(timeout_s)
+
+        while time.monotonic() < deadline:
+            if self._feedback is not None:
+                snapshot = self._require_fresh_snapshot()
+                if snapshot is None:
+                    time.sleep(WAIT_POLL_INTERVAL_S)
+                    continue
+
+                if snapshot.robot_mode in FATAL_ROBOT_MODES:
+                    raise FatalError(
+                        f"Nova 2 处于异常状态（RobotMode={snapshot.robot_mode}）"
+                    )
+
+                if snapshot.robot_mode == ROBOT_MODE_DISABLED:
+                    raise FatalError("Nova 2 在运动过程中变为未使能状态")
+
+                if (
+                    snapshot.robot_mode in MOVING_ROBOT_MODES
+                    or snapshot.tcp_speed_norm_mm_s > STOP_SPEED_THRESHOLD_MM_S
+                ):
+                    return True
+            else:
+                mode = self._read_robot_mode()
+
+                if mode in FATAL_ROBOT_MODES:
+                    raise FatalError(f"Nova 2 处于异常状态（RobotMode={mode}）")
+
+                if mode == ROBOT_MODE_DISABLED:
+                    raise FatalError("Nova 2 在运动过程中变为未使能状态")
+
+                if mode in MOVING_ROBOT_MODES:
                     return True
 
             time.sleep(WAIT_POLL_INTERVAL_S)
